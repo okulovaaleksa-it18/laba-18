@@ -1,0 +1,159 @@
+//STL3Alg60.Дан список L. //3 61
+//Получить вектор V вещественных чисел, содержащий значения среднего арифметического для всех пар соседних элементов 
+//исходного списка(количество элементов вектора V должно быть на 1 меньше количества элементов списка L).
+//Например, для исходного списка 1, 3, 4, 6 полученный вектор должен содержать значения 2.0, 3.5, 5.0.
+//Использовать алгоритм adjacent_difference с итератором вставки и функциональным объектом,
+//а также функцию - член erase для вектора V.
+
+//Алгоритм adjacent_difference вычисляет разницу между элементами последовательности 
+//и записывает результаты в выходной контейнер.
+
+#include <iostream>
+#include <list>
+#include <vector>
+#include <algorithm>
+#include <iterator>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <numeric>
+
+using namespace std;
+
+//для вычисления среднего арифметического
+struct average 
+{
+    double operator()(int x, int y) const 
+    {
+        return (x + y) / 2.0;
+    }
+};
+
+template <typename T>
+void printContainer(const T& container) 
+{
+    for (const auto& elem : container) 
+    {
+        cout << elem << " ";
+    }
+    cout << endl;
+}
+
+// ввод с клавиатуры
+void inputListKeyboard(list<int>& L, int& n) 
+{
+    cout << "Введите количество элементов: ";
+    cin >> n;
+    while (n <= 1) 
+    {
+        cout << "Количество должно быть больше 1: ";
+        cin >> n;
+    }
+
+    cout << "Введите " << n << " целых чисел: ";
+    for (int i = 0; i < n; ++i) 
+    {
+        int x;
+        cin >> x;
+        L.push_back(x);
+    }
+}
+
+// ввод из файла
+void inputListFile(list<int>& L, int& n)
+{
+    ifstream file("lab188.txt");
+    if (!file)
+    {
+        cout << "Не удалось открыть файл" << endl;
+        exit(1);
+    }
+
+    file >> n;
+    if (n % 2 != 0 || n <= 0)
+    {
+        cout << "Ошибка: количество элементов в файле должно быть положительным и чётным" << endl;
+        exit(1);
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        int num;
+        file >> num;
+        L.push_back(num);
+    }
+
+    file.close();
+}
+
+// случайный ввод
+void inputListRandom(list<int>& L, int& n) 
+{
+    cout << "Введите количество элементов: ";
+    cin >> n;
+    while (n <= 1) 
+    {
+        cout << "Количество должно быть больше 1: ";
+        cin >> n;
+    }
+
+    int min_val, max_val;
+    cout << "Введите диапазон случайных чисел (min max): ";
+    cin >> min_val >> max_val;
+
+    srand(time(0));
+    for (int i = 0; i < n; ++i) 
+    {
+        int x = min_val + rand() % (max_val - min_val + 1);
+        L.push_back(x);
+    }
+}
+
+void inputListWithChoice(list<int>& L, int& n) 
+{
+    int choice;
+    cout << "Выберите способ ввода данных:\n";
+    cout << "1 — С клавиатуры\n";
+    cout << "2 — Из файла\n";
+    cout << "3 — Случайные числа\n";
+    cout << "Ваш выбор: ";
+    cin >> choice;
+
+    switch (choice) 
+    {
+    case 1:
+        inputListKeyboard(L, n);
+        break;
+    case 2:
+        inputListFile(L, n);
+        break;
+    case 3:
+        inputListRandom(L, n);
+        break;
+    default:
+        cout << "Неверный выбор" << endl;
+        exit(1);
+    }
+}
+
+int main() 
+{
+    setlocale(LC_ALL, "ru");
+
+    list<int> L;
+    int n;
+
+    inputListWithChoice(L, n);
+
+    cout << "Исходный список: ";
+    printContainer(L);
+
+    vector<double> V;
+    adjacent_difference(L.begin(), L.end(), back_inserter(V), average());
+    V.erase(V.begin()); 
+
+    cout << "Вектор средних арифметических: ";
+    printContainer(V);
+
+    return 0;
+}
