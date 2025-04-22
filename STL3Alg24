@@ -1,0 +1,178 @@
+//STL3Alg24.Даны списки L1 и L2, каждый из которых содержит четное количество элементов.
+//В каждом списке продублировать первую половину, добавив ее элементы в конец списка в обратном порядке.
+//Для первого списка использовать алгоритм reverse_copy и итератор вставки, 
+//для второго — функцию - член insert и обратные итераторы.
+//Использовать также функцию advance.
+ 
+//Алгоритм reverse_copy создает копию диапазона элементов, но в обратном порядке.
+//advance - смещение  итератора на заданное кол-во позиций вперед или назад.
+
+#include <iostream>
+#include <list>
+#include <algorithm>
+#include <iterator>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+void printList(const list<int>& L) 
+{
+    for (int num : L) 
+    {
+        cout << num << " ";
+    }
+    cout << endl;
+}
+
+// ввод с клавиатуры
+void inputListKeyboard(list<int>& L, int& n) 
+{
+    do 
+    {
+        cout << "Введите количество элементов списка (чётное число): ";
+        cin >> n;
+        if (n % 2 != 0 || n <= 0) 
+        {
+            cout << "Ошибка: количество должно быть положительным и чётным" << endl;
+        }
+    } while (n % 2 != 0 || n <= 0);
+
+    cout << "Введите " << n << " элементов списка: ";
+    for (int i = 0; i < n; ++i) 
+    {
+        int num;
+        cin >> num;
+        L.push_back(num);
+    }
+}
+
+// ввод из файла
+void inputListFile(list<int>& L, int& n) 
+{
+    ifstream file("lab188.txt");
+    if (!file) 
+    {
+        cout << "Не удалось открыть файл" << endl;
+        exit(1);
+    }
+
+    file >> n;
+    if (n % 2 != 0 || n <= 0) 
+    {
+        cout << "Ошибка: количество элементов в файле должно быть положительным и чётным" << endl;
+        exit(1);
+    }
+
+    for (int i = 0; i < n; ++i) 
+    {
+        int num;
+        file >> num;
+        L.push_back(num);
+    }
+
+    file.close();
+}
+
+// случайный ввод
+void inputListRandom(list<int>& L, int& n) 
+{
+    do 
+    {
+        cout << "Введите чётное количество элементов: ";
+        cin >> n;
+        if (n % 2 != 0 || n <= 0) 
+        {
+            cout << "Ошибка: количество должно быть положительным и чётным" << endl;
+        }
+    } while (n % 2 != 0 || n <= 0);
+
+    int min_val, max_val;
+    cout << "Введите диапазон случайных чисел (min max): ";
+    cin >> min_val >> max_val;
+
+    srand(time(0));
+    for (int i = 0; i < n; ++i) 
+    {
+        int x = min_val + rand() % (max_val - min_val + 1);
+        L.push_back(x);
+    }
+}
+
+// список L1 (через reverse_copy)
+void processList1(list<int>& L) 
+{
+    int halfSize = L.size() / 2;
+    auto it = L.begin();
+    advance(it, halfSize);
+    list<int> firstHalf(L.begin(), it);
+    reverse_copy(firstHalf.begin(), firstHalf.end(), back_inserter(L));
+}
+
+// список L2 (через rbegin/rend)
+void processList2(list<int>& L) 
+{
+    int halfSize = L.size() / 2;
+    auto it = L.begin();
+    advance(it, halfSize);
+    list<int> firstHalf(L.begin(), it);
+    for (auto rit = firstHalf.rbegin(); rit != firstHalf.rend(); ++rit) {
+        L.push_back(*rit);
+    }
+}
+
+void inputListWithChoice(list<int>& L, int& n, const string& name) 
+{
+    int choice;
+    cout << "Выберите способ ввода для списка " << name << ":\n";
+    cout << "1 — С клавиатуры\n";
+    cout << "2 — Из файла\n";
+    cout << "3 — Случайные числа\n";
+    cout << "Ваш выбор: ";
+    cin >> choice;
+
+    switch (choice) 
+    {
+    case 1:
+        inputListKeyboard(L, n);
+        break;
+    case 2:
+        inputListFile(L, n);
+        break;
+    case 3:
+        inputListRandom(L, n);
+        break;
+    default:
+        cout << "Неверный выбор" << endl;
+        exit(1);
+    }
+}
+
+int main() 
+{
+    setlocale(LC_ALL, "ru");
+
+    list<int> L1, L2;
+    int n1, n2;
+
+    cout << "Ввод данных для списка L1:\n";
+    inputListWithChoice(L1, n1, "L1");
+
+    cout << "\nВвод данных для списка L2:\n";
+    inputListWithChoice(L2, n2, "L2");
+
+    cout << "\nИсходный список L1: ";
+    printList(L1);
+    cout << "Исходный список L2: ";
+    printList(L2);
+
+    processList1(L1);
+    processList2(L2);
+
+    cout << "\nСписок L1 после обработки: ";
+    printList(L1);
+    cout << "Список L2 после обработки: ";
+    printList(L2);
+
+    return 0;
+}
