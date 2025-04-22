@@ -1,0 +1,154 @@
+//STL3Alg7.Дан вектор V с четным количеством элементов.Добавить нулевой элемент перед
+//последним элементом в первой половине вектора, совпадающим с каким - либо элементом из
+//второй половины этого же вектора.Если вектор не содержит требуемых элементов, то не
+//изменять его.Использовать алгоритм find_first_of и функцию - член insert
+ 
+// find_first_of - находит первый эл-т в одном контейнере, который встречается хотя бы 
+// в одном из элементов другого контейнера или диапазона
+ 
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iterator>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+void printVector(const vector<int>& V) 
+{
+    for (int num : V) 
+    {
+        cout << num << " ";
+    }
+    cout << endl;
+}
+
+//добавляет 0 перед первым совпадающим элементом из первой половины вектора, который встречается во второй половине
+void addZeroBeforeMatch(vector<int>& V) 
+{
+    int mid = V.size() / 2;
+
+    vector<int> first_half(V.begin(), V.begin() + mid);
+    vector<int> second_half(V.begin() + mid, V.end());
+
+    auto it = find_first_of(first_half.begin(), first_half.end(), second_half.begin(), second_half.end());
+
+    if (it != first_half.end()) 
+    {
+        auto pos = V.begin() + distance(first_half.begin(), it);
+        V.insert(pos, 0);
+    }
+}
+
+// ввод с клавиатуры
+void inputFromKeyboard(vector<int>& V, int& n) 
+{
+    cout << "Введите чётное количество элементов вектора: ";
+    cin >> n;
+    while (n % 2 != 0 || n <= 0) 
+    {
+        cout << "Ошибка. Количество элементов должно быть положительным и чётным. Повторите ввод: ";
+        cin >> n;
+    }
+
+    cout << "Введите " << n << " элементов: ";
+    for (int i = 0; i < n; ++i) 
+    {
+        int x;
+        cin >> x;
+        V.push_back(x);
+    }
+}
+
+//ввод из файла
+void inputFromFile(vector<int>& V, int& n) 
+{
+    ifstream file("lab188.txt");
+    if (!file) 
+    {
+        cout << "Не удалось открыть файл" << endl;
+        exit(1);
+    }
+
+    file >> n;
+    if (n % 2 != 0 || n <= 0) 
+    {
+        cout << "Ошибка. Количество элементов в файле должно быть чётным и положительным" << endl;
+        exit(1);
+    }
+
+    for (int i = 0; i < n; ++i) 
+    {
+        int x;
+        file >> x;
+        V.push_back(x);
+    }
+
+    file.close();
+}
+
+// случайный ввод
+void inputRandom(vector<int>& V, int& n) 
+{
+    cout << "Введите чётное количество элементов: ";
+    cin >> n;
+    while (n % 2 != 0 || n <= 0) 
+    {
+        cout << "Ошибка. Количество должно быть положительным и чётным. Повторите ввод: ";
+        cin >> n;
+    }
+
+    int min_val, max_val;
+    cout << "Введите диапазон случайных чисел (min max): ";
+    cin >> min_val >> max_val;
+
+    srand(time(0));
+    for (int i = 0; i < n; ++i) 
+    {
+        int x = min_val + rand() % (max_val - min_val + 1);
+        V.push_back(x);
+    }
+}
+
+int main() 
+{
+    setlocale(LC_ALL, "ru");
+
+    vector<int> V;
+    int n;
+    int choice;
+
+    cout << "Выберите способ ввода данных:\n";
+    cout << "1 — С клавиатуры\n";
+    cout << "2 — Из файла\n";
+    cout << "3 — Случайные числа\n";
+    cout << "Ваш выбор: ";
+    cin >> choice;
+
+    switch (choice) 
+    {
+    case 1:
+        inputFromKeyboard(V, n);
+        break;
+    case 2:
+        inputFromFile(V, n);
+        break;
+    case 3:
+        inputRandom(V, n);
+        break;
+    default:
+        cout << "Неверный выбор!" << endl;
+        return 1;
+    }
+
+    cout << "Исходный вектор: ";
+    printVector(V);
+
+    addZeroBeforeMatch(V);
+
+    cout << "Вектор после изменений: ";
+    printVector(V);
+
+    return 0;
+}
